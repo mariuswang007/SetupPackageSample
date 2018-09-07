@@ -38,6 +38,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "C:\code\SetupPackageSample\forWindos\luncher.ico"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "C:\code\SetupPackageSample\forWindos\openChrome.bat"; DestDir: "{app}"; Flags: ignoreversion;
 
 [Code]
 const
@@ -73,12 +74,12 @@ begin
     if IsWin64 then
     begin
       //add link for downloads
-      idpAddFile('http://127.0.0.1:8000/dl/68.0.3440.106_chrome_installer.exe', ExpandConstant('{tmp}\chrome.exe'));  
+      idpAddFile('https://resource.uuabc.com/windows_chrome_install.exe', ExpandConstant('{tmp}\chrome.exe'));  
     end
     else
     begin
       //32 bit version
-      //idpAddFile('http://127.0.0.1:8000/dl/68.0.3440.106_chrome_installer.exe', ExpandConstant('{tmp}\chrome.exe'));  
+      idpAddFile('https://resource.uuabc.com/windows_chrome_install.exe', ExpandConstant('{tmp}\chrome.exe'));  
     end
 
     //download
@@ -87,9 +88,8 @@ begin
 end;
 
 [Icons]
-Name: "{commondesktop}\{#MyAppName}"; Filename: "{code:GetChromeFileName}"; Parameters:"uuabc.com"; Tasks: desktopicon; IconFilename: "{app}\luncher.ico"; Flags : useapppaths; 
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\openChrome.bat"; Tasks: desktopicon; IconFilename: "{app}\luncher.ico"; Flags : useapppaths; 
 
 [Run]
-Filename: "{tmp}\chrome.exe"; Check: not IsChromeInstalled; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: skipifdoesntexist; 
-Filename: "{code:GetChromeFileName}"; Parameters: "uuabc.com"; Check: IsChromeInstalled; Flags: waituntilterminated;  
+Filename: "{tmp}\chrome.exe"; Check: not IsChromeInstalled; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: skipifdoesntexist; Filename: "{code:GetChromeFileName}"; Parameters: "uuabc.com"; Check: IsChromeInstalled; Flags: waituntilterminated;  
 
