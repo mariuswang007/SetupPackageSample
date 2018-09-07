@@ -23,9 +23,9 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 CreateAppDir=no
 InfoBeforeFile=C:\Users\Marius\Documents\uuabc Installer\BeforeInstallation.txt
-InfoAfterFile=C:\Users\Marius\Documents\uuabc Installer\AfterInstallation.txt
+;InfoAfterFile=C:\Users\Marius\Documents\uuabc Installer\AfterInstallation.txt
 OutputBaseFilename=uuabc_setup
-SetupIconFile=
+SetupIconFile= C:\code\SetupPackageSample\forWindos\luncher.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -36,9 +36,20 @@ Name: "chinese"; MessagesFile: "compiler:Languages\Chinese.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 
+[Files]
+Source: "C:\code\SetupPackageSample\forWindos\luncher.ico"; DestDir: "{app}"; Flags: ignoreversion;
+
 [Code]
 const
   ChromeAppRegKey = 'Software\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe';
+
+function IsChromeInstalled: Boolean;
+begin
+  { check if there's the Chrome app registration entry under the HKCU, or }
+  { HKLM root key, return the result }
+  Result := RegKeyExists(HKEY_CURRENT_USER, ChromeAppRegKey) or
+    RegKeyExists(HKEY_LOCAL_MACHINE, ChromeAppRegKey);
+end;
 
 function GetChromeFileName(Value: string): string;
 var
@@ -72,12 +83,13 @@ begin
 
     //download
     idpDownloadAfter(wpReady);
-  end
+  end  
 end;
 
 [Icons]
-Name: "{commondesktop}\{#MyAppName}"; Filename: "{code:GetChromeFileName}"; Parameters:"uuabc.com" ;Tasks: desktopicon
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{code:GetChromeFileName}"; Parameters:"uuabc.com"; Tasks: desktopicon; IconFilename: "{app}\luncher.ico"; Flags : useapppaths; 
 
 [Run]
-Filename: "{tmp}\chrome.exe"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: postinstall skipifdoesntexist; 
-Filename: "{code:GetChromeFileName}"; Parameters: "uuabc.com"; Flags: nowait
+Filename: "{tmp}\chrome.exe"; Check: not IsChromeInstalled; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: skipifdoesntexist; 
+Filename: "{code:GetChromeFileName}"; Parameters: "uuabc.com"; Check: IsChromeInstalled; Flags: waituntilterminated;  
+
