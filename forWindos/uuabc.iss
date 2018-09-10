@@ -4,7 +4,7 @@
 #include <idp.iss>
 
 #define MyAppName "uuabc"
-#define MyAppVersion "1.5"
+#define MyAppVersion "1.0"
 #define MyAppPublisher "uuabc, Inc."
 #define MyAppURL "https://www.uuabc.com/"
 #define MyAppExeName "MyProg.exe"
@@ -67,9 +67,48 @@ begin
     Result := S;
 end;
 
-procedure InitializeWizard();
-begin
-  if GetChromeFileName('') = '' then
+function CheckChrome :string;
+var
+  ChromeMS, ChromeLS: Cardinal;
+  ChromeMajorVersion, ChromeMinorVersion: Cardinal;
+  InstallChrome: Boolean;
+  ChromeFileName: string;
+  ChromeInstallerFileName: string;
+  ResultCode: Integer;
+begin
+  ChromeFileName := GetChromeFileName('');
+  if ChromeFileName = '' then
+  begin
+    Log('Chrome not found, will install');
+    InstallChrome := True;
+  end
+    else
+  begin
+    Log(Format('Found Chrome path %s', [ChromeFileName]));
+    if not GetVersionNumbers(ChromeFileName, ChromeMS, ChromeLS) then
+    begin
+      Log(Format('Cannot read Chrome version from %s, will install', [ChromeFileName]));
+      InstallChrome := True;
+    end
+      else
+    begin
+      ChromeMajorVersion := ChromeMS shr 16;
+      ChromeMinorVersion := ChromeMS and $FFFF;
+      Log(Format('Chrome version is %d.%d', [ChromeMajorVersion, ChromeMinorVersion]));
+      if ChromeMajorVersion < 53 then
+      begin
+        Log('Chrome is too old, will install');
+        InstallChrome := True;
+      end
+        else
+      begin
+        Log('Chrome is up to date, will not install');
+        InstallChrome := False;
+      end;
+    end;
+  end;
+
+  if InstallChrome then
   begin
     if IsWin64 then
     begin
@@ -83,8 +122,13 @@ begin
     end
 
     //download
-    idpDownloadAfter(wpReady);
-  end  
+    idpDownloadAfter(wpReady);    
+  end;
+end;
+
+procedure InitializeWizard;
+begin
+  CheckChrome;  
 end;
 
 [Icons]
